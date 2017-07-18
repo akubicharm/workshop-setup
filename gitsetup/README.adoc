@@ -1,0 +1,5 @@
+# git client コンテナの作成
+docker build . -t centos-workshop-gitsetup
+docker login docker.io
+docker tag centos-workshop-gitsetup docker.io/akubicharm/centos-workshop-gitsetup
+docker push docker.io/akubicharm/centos-workshop-gitsetup

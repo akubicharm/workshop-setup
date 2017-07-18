@@ -1,0 +1,382 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "gogs"
+                },
+                "name": "gogs"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "description": "Exposes the database server"
+                },
+                "name": "gogs-postgresql"
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "postgresql",
+                        "port": 5432,
+                        "targetPort": 5432
+                    }
+                ],
+                "selector": {
+                    "name": "gogs-postgresql"
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "DeploymentConfig",
+            "metadata": {
+                "annotations": {
+                    "description": "Defines how to deploy the database"
+                },
+                "name": "gogs-postgresql"
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "name": "gogs-postgresql"
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "name": "gogs-postgresql"
+                        },
+                        "name": "gogs-postgresql"
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "POSTGRESQL_USER",
+                                        "value": "gogs"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_PASSWORD",
+                                        "value": "gogs"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_DATABASE",
+                                        "value": "gogs"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_MAX_CONNECTIONS",
+                                        "value": "100"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_SHARED_BUFFERS",
+                                        "value": "12MB"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_ADMIN_PASSWORD",
+                                        "value": "OWgmMEyq"
+                                    }
+                                ],
+                                "image": " ",
+                                "livenessProbe": {
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 5432
+                                    },
+                                    "timeoutSeconds": 1
+                                },
+                                "name": "postgresql",
+                                "ports": [
+                                    {
+                                        "containerPort": 5432
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/sh",
+                                            "-i",
+                                            "-c",
+                                            "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"
+                                        ]
+                                    },
+                                    "initialDelaySeconds": 5,
+                                    "timeoutSeconds": 1
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "memory": "512Mi"
+                                    }
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/pgsql/data",
+                                        "name": "gogs-postgres-data"
+                                    }
+                                ]
+                            }
+                        ],
+                        "serviceAccountName": "gogs",
+                        "volumes": [
+                            {
+                                "emptyDir": {},
+                                "name": "gogs-postgres-data"
+                            }
+                        ]
+                    }
+                },
+                "triggers": [
+                    {
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "postgresql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "postgresql:9.5",
+                                "namespace": "openshift"
+                            }
+                        },
+                        "type": "ImageChange"
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "description": "The Gogs server's http port",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\":\"gogs-postgresql\",\"namespace\":\"\",\"kind\":\"Service\"}]"
+                },
+                "labels": {
+                    "app": "gogs"
+                },
+                "name": "gogs"
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "3000-tcp",
+                        "port": 3000,
+                        "protocol": "TCP",
+                        "targetPort": 3000
+                    }
+                ],
+                "selector": {
+                    "app": "gogs",
+                    "deploymentconfig": "gogs"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "id": "gogs-http",
+            "kind": "Route",
+            "metadata": {
+                "annotations": {
+                    "description": "Route for application's http service."
+                },
+                "labels": {
+                    "app": "gogs"
+                },
+                "name": "gogs"
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "name": "gogs"
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "DeploymentConfig",
+            "metadata": {
+                "labels": {
+                    "app": "gogs"
+                },
+                "name": "gogs"
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "app": "gogs",
+                    "deploymentconfig": "gogs"
+                },
+                "strategy": {
+                    "resources": {},
+                    "rollingParams": {
+                        "intervalSeconds": 1,
+                        "maxSurge": "25%",
+                        "maxUnavailable": "25%",
+                        "timeoutSeconds": 600,
+                        "updatePeriodSeconds": 1
+                    },
+                    "type": "Rolling"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "gogs",
+                            "deploymentconfig": "gogs"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "image": " ",
+                                "imagePullPolicy": "Always",
+                                "livenessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 3000,
+                                        "scheme": "HTTP"
+                                    },
+                                    "initialDelaySeconds": 3,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "name": "gogs",
+                                "ports": [
+                                    {
+                                        "containerPort": 3000,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 3000,
+                                        "scheme": "HTTP"
+                                    },
+                                    "initialDelaySeconds": 3,
+                                    "periodSeconds": 20,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/opt/gogs/data",
+                                        "name": "gogs-data"
+                                    },
+                                    {
+                                        "mountPath": "/etc/gogs/conf",
+                                        "name": "gogs-config"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "securityContext": {},
+                        "serviceAccountName": "gogs",
+                        "terminationGracePeriodSeconds": 30,
+                        "volumes": [
+                            {
+                                "emptyDir": {},
+                                "name": "gogs-data"
+                            },
+                            {
+                                "configMap": {
+                                    "items": [
+                                        {
+                                            "key": "app.ini",
+                                            "path": "app.ini"
+                                        }
+                                    ],
+                                    "name": "gogs-config"
+                                },
+                                "name": "gogs-config"
+                            }
+                        ]
+                    }
+                },
+                "test": false,
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "gogs"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "gogs:0.9.97"
+                            }
+                        },
+                        "type": "ImageChange"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "labels": {
+                    "app": "gogs"
+                },
+                "name": "gogs"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "annotations": {
+                            "description": "The Gogs git server docker image",
+                            "tags": "gogs,go,golang",
+                            "version": "0.9.97"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "docker.io/openshiftdemos/gogs:0.9.97"
+                        },
+                        "importPolicy": {},
+                        "name": "0.9.97"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "data": {
+                "app.ini": "RUN_MODE = prod\nRUN_USER = gogs\n\n[database]\nDB_TYPE  = postgres\nHOST     = gogs-postgresql:5432\nNAME     = gogs\nUSER     = gogs\nPASSWD   = gogs\n\n[repository]\nROOT = /opt/gogs/data/repositories\n\n[server]\nROOT_URL=http://\nSSH_DOMAIN=\n\n[security]\nINSTALL_LOCK = true\n\n[service]\nENABLE_CAPTCHA = false\n\n[webhook]\nSKIP_TLS_VERIFY = false\n"
+            },
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": "gogs-config"
+            }
+        }
+    ]
+}
