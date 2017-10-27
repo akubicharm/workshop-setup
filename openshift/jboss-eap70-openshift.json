@@ -1,0 +1,133 @@
+{
+    "kind": "ImageStream",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "jboss-eap70-openshift",
+        "generation": 2,
+        "creationTimestamp": null,
+        "annotations": {
+            "openshift.io/display-name": "Red Hat JBoss EAP 7.0",
+            "openshift.io/image.dockerRepositoryCheck": "2017-10-16T09:34:35Z"
+        }
+    },
+    "spec": {
+        "lookupPolicy": {
+            "local": false
+        },
+        "dockerImageRepository": "registry.access.redhat.com/jboss-eap-7/eap70-openshift",
+        "tags": [
+            {
+                "name": "1.3",
+                "annotations": {
+                    "description": "JBoss EAP 7.0 S2I images.",
+                    "iconClass": "icon-jboss",
+                    "openshift.io/display-name": "Red Hat JBoss EAP 7.0",
+                    "sampleContextDir": "kitchensink",
+                    "sampleRef": "7.0.0.GA",
+                    "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                    "supports": "eap:7.0,javaee:7,java:8,xpaas:1.3",
+                    "tags": "builder,eap,javaee,java,jboss,xpaas",
+                    "version": "1.3"
+                },
+                "generation": 1,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "1.4",
+                "annotations": {
+                    "description": "JBoss EAP 7.0 S2I images.",
+                    "iconClass": "icon-jboss",
+                    "openshift.io/display-name": "Red Hat JBoss EAP 7.0",
+                    "sampleContextDir": "kitchensink",
+                    "sampleRef": "7.0.0.GA",
+                    "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                    "supports": "eap:7.0,javaee:7,java:8,xpaas:1.4",
+                    "tags": "builder,eap,javaee,java,jboss,xpaas",
+                    "version": "1.4"
+                },
+                "generation": 1,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "1.5",
+                "annotations": {
+                    "description": "JBoss EAP 7.0 S2I images.",
+                    "iconClass": "icon-jboss",
+                    "sampleContextDir": "kitchensink",
+                    "sampleRef": "7.0.0.GA",
+                    "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                    "supports": "eap:7.0,javaee:7,java:8,xpaas:1.5",
+                    "tags": "builder,eap,javaee,java,jboss,xpaas",
+                    "version": "1.5"
+                },
+                "from": {
+                    "kind": "DockerImage",
+                    "name": "registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.5"
+                },
+                "generation": 2,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "1.5-18",
+                "annotations": null,
+                "from": {
+                    "kind": "DockerImage",
+                    "name": "registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.5-18"
+                },
+                "generation": 2,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "1.5-20",
+                "annotations": null,
+                "from": {
+                    "kind": "DockerImage",
+                    "name": "registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.5-20"
+                },
+                "generation": 2,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "1.5-21",
+                "annotations": null,
+                "from": {
+                    "kind": "DockerImage",
+                    "name": "registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.5-21"
+                },
+                "generation": 2,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            },
+            {
+                "name": "latest",
+                "annotations": null,
+                "from": {
+                    "kind": "DockerImage",
+                    "name": "registry.access.redhat.com/jboss-eap-7/eap70-openshift:latest"
+                },
+                "generation": 2,
+                "importPolicy": {},
+                "referencePolicy": {
+                    "type": "Source"
+                }
+            }
+        ]
+    }
+}
